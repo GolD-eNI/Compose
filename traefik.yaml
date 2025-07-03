@@ -32,7 +32,7 @@ api:
 certificatesResolvers:
   myresolver:
     acme:
-      email: ssl-admin@example.com
+      email: eniolamy1@outlook.fr
       storage: /data/certs.json
       httpChallenge:
         entryPoint: web
