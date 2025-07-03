@@ -13,7 +13,7 @@ services:
   ## MariaDB 11.4 Database Server
   ## Docs: https://mariadb.com/docs/reference/
   ## Release Notes: https://mariadb.com/kb/en/release-notes-mariadb-11-4-series/
-  mariadb-11-4:
+  mariadb:
     image: mariadb:11.4
     security_opt: # see https://github.com/MariaDB/mariadb-docker/issues/434#issuecomment-1136151239
       - seccomp:unconfined
@@ -35,7 +35,7 @@ services:
     image: photoprism/photoprism:latest
     restart: unless-stopped
     depends_on:
-      - mariadb-11-4
+      - mariadb
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.photoprism.rule=Host(`lam60.freeboxos.fr`)"
