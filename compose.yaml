@@ -35,7 +35,7 @@ services:
     image: photoprism/photoprism:latest
     restart: unless-stopped
     depends_on:
-      - mariadb
+      - mariadb-11-4
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.photoprism.rule=Host(`lam60.freeboxos.fr`)"
