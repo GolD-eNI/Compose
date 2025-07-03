@@ -34,15 +34,16 @@ services:
   photoprism:
     image: photoprism/photoprism:latest
     restart: unless-stopped
+    depends_on:
+      - mariadb
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.photoprism.rule=Host(`example.com`)"
+      - "traefik.http.routers.photoprism.rule=Host(`lam60.freeboxos.fr`)"
       - "traefik.http.routers.photoprism.tls=true"
       - "traefik.http.routers.photoprism.tls.certresolver=myresolver" 
     volumes:
       - "./originals:/photoprism/originals"
       - "./storage:/photoprism/storage"
-    working_dir: "/photoprism"
     networks: 
       - web
     environment:
