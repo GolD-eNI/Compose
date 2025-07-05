@@ -26,9 +26,6 @@ global:
 # allow to proxy services with self-signed certificates
 serversTransport:
   insecureSkipVerify: true
-  # !! REMOVE when using Let's Encrypt HTTPS !!
-  rootCAs:
-    - "/certs/ca.crt"
 
 # open ports and protocols (HTTP will be redirected to HTTPS)
 entryPoints:
@@ -44,7 +41,8 @@ entryPoints:
     transport:
       respondingTimeouts:
         readTimeout: "3h"
-        writeTimeout: "0s"
+        writeTimeout: "3h"
+        idleTimeout: "3h"
 
 # auto tls / https
 certificatesResolvers:
@@ -59,10 +57,6 @@ certificatesResolvers:
 
 # config providers
 providers:
-  # !! REMOVE file provider when using Let's Encrypt HTTPS !!
-  file:
-    filename: "/certs/config.yml"
-    watch: true
   # always keep this
   docker:
     exposedByDefault: false
