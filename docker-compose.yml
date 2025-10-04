@@ -26,28 +26,6 @@ services:
       - "./traefik.yaml:/etc/traefik/traefik.yaml"
       - "./certs/:/certs/"
       - "/var/log/traefik:/var/log/traefik"
-    networks:
-      - immich-network
-  
-  fail2ban:
-    image: crazymax/fail2ban:latest
-    container_name: fail2ban
-    restart: unless-stopped
-    network_mode: "host"
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    volumes:
-      - "./fail2ban/jail.local:/etc/fail2ban/jail.local:ro"
-      - "./fail2ban/filter.d:/etc/fail2ban/filter.d:ro"
-      - "/var/log:/var/log:ro"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    environment:
-      - TZ=Europe/Paris
-      - F2B_LOG_LEVEL=INFO
-      - F2B_DB_PURGE_AGE=30d
-    depends_on:
-      - traefik
   
   immich-server:
     container_name: immich_server
@@ -65,8 +43,6 @@ services:
       - redis
       - database
     restart: always
-    networks:
-      - immich-network
     healthcheck:
       disable: false
     labels:
@@ -76,8 +52,6 @@ services:
       traefik.http.routers.immich.entrypoints: websecure
       traefik.http.routers.immich.rule: Host(`lam60.freeboxos.fr`)
       traefik.http.services.immich.loadbalancer.server.port: 2283
-
-      traefik.docker.network: immich_immich-network
 
   immich-machine-learning:
     container_name: immich_machine_learning
@@ -92,8 +66,6 @@ services:
     env_file:
       - .env
     restart: always
-    networks:
-      - immich-network
     healthcheck:
       disable: false
 
@@ -103,8 +75,6 @@ services:
     healthcheck:
       test: redis-cli ping || exit 1
     restart: always
-    networks:
-      - immich-network
 
   database:
     container_name: immich_postgres
@@ -121,13 +91,7 @@ services:
       - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
     restart: always
     networks:
-      - immich-network
     shm_size: 128mb
-
-networks:
-  immich-network:
-    driver: bridge
-    name: immich-network 
 
 volumes:
   model-cache:
