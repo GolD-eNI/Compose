@@ -44,12 +44,17 @@ providers:
   docker:
     exposedByDefault: false
     watch: true
-    network: immich-network
 
 # Logs d'accès pour Fail2Ban
 accessLog:
   filePath: "/var/log/traefik/access.log"
   format: json
+  fields:
+    headers:
+      request: true
+      response: true
+    # Forcer l'heure locale
+    startUTC: false
 
 # disable dashboard and api
 api:

@@ -77,6 +77,8 @@ services:
       traefik.http.routers.immich.rule: Host(`lam60.freeboxos.fr`)
       traefik.http.services.immich.loadbalancer.server.port: 2283
 
+      traefik.docker.network: immich_immich-network
+
   immich-machine-learning:
     container_name: immich_machine_learning
     # For hardware acceleration, add one of -[armnn, cuda, rocm, openvino, rknn] to the image tag.
@@ -125,6 +127,7 @@ services:
 networks:
   immich-network:
     driver: bridge
+    name: immich-network 
 
 volumes:
   model-cache:
