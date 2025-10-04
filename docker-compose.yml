@@ -12,7 +12,7 @@ name: immich
 services:
   traefik:
     restart: always
-    image: traefik:v2.11
+    image: traefik:v3.5
     container_name: traefik
     ports:
       - "80:80"
@@ -25,6 +25,29 @@ services:
       - "./traefik/:/data/"
       - "./traefik.yaml:/etc/traefik/traefik.yaml"
       - "./certs/:/certs/"
+      - "/var/log/traefik:/var/log/traefik"
+    networks:
+      - immich-network
+  
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    container_name: fail2ban
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - "./fail2ban/jail.local:/etc/fail2ban/jail.local:ro"
+      - "./fail2ban/filter.d:/etc/fail2ban/filter.d:ro"
+      - "/var/log:/var/log:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - TZ=Europe/Paris
+      - F2B_LOG_LEVEL=INFO
+      - F2B_DB_PURGE_AGE=30d
+    depends_on:
+      - traefik
   
   immich-server:
     container_name: immich_server
@@ -42,10 +65,13 @@ services:
       - redis
       - database
     restart: always
+    networks:
+      - immich-network
     healthcheck:
       disable: false
     labels:
       traefik.enable: true
+      traefik.http.routers.immich.tls: true
       traefik.http.routers.immich.tls.certresolver: myresolver
       traefik.http.routers.immich.entrypoints: websecure
       traefik.http.routers.immich.rule: Host(`lam60.freeboxos.fr`)
@@ -64,19 +90,23 @@ services:
     env_file:
       - .env
     restart: always
+    networks:
+      - immich-network
     healthcheck:
       disable: false
 
   redis:
     container_name: immich_redis
-    image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
+    image: docker.io/valkey/valkey:8-bookworm@sha256:fea8b3e67b15729d4bb70589eb03367bab9ad1ee89c876f54327fc7c6e618571
     healthcheck:
       test: redis-cli ping || exit 1
     restart: always
+    networks:
+      - immich-network
 
   database:
     container_name: immich_postgres
-    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:8d292bdb796aa58bbbaa47fe971c8516f6f57d6a47e7172e62754feb6ed4e7b0
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}
@@ -88,6 +118,13 @@ services:
       # Do not edit the next line. If you want to change the database storage location on your system, edit the value of DB_DATA_LOCATION in the .env file
       - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
     restart: always
+    networks:
+      - immich-network
+    shm_size: 128mb
+
+networks:
+  immich-network:
+    driver: bridge
 
 volumes:
   model-cache:

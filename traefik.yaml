@@ -44,9 +44,14 @@ providers:
   docker:
     exposedByDefault: false
     watch: true
+    network: immich-network
+
+# Logs d'accès pour Fail2Ban
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  format: json
 
 # disable dashboard and api
 api:
   insecure: false
-
   dashboard: false
